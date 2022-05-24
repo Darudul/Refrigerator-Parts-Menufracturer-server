@@ -114,10 +114,36 @@ async function run() {
       );
       res.send({ result, token });
     });
+
+    // make user admin
+    app.put("/user/admin/:email", verifyJWTToken, async (req, res) => {
+      const email = req.params.email;
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAccount.role === "admin") {
+        const filter = { email: email };
+        const updateDoc = {
+          $set: { role: "admin" },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } else {
+        res.status(403).send({ message: "forbidden access" });
+      }
+    });
     // get user data by email
     app.get("/user", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
+      const user = await userCollection.find(query).toArray();
+      res.send(user);
+    });
+
+    // get all user
+    app.get("/allusers", verifyJWTToken, async (req, res) => {
+      const query = {};
       const user = await userCollection.find(query).toArray();
       res.send(user);
     });
