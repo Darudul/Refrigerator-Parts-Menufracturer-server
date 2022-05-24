@@ -60,38 +60,19 @@ async function run() {
       res.send(tool);
     });
 
-    // update quantity
-    // app.post("/api/order", async (req, res) => {
-    //   const order = req.body;
-    //   const product = await toolsCollection.findOne({
-    //     _id: ObjectId(order?.product),
-    //   });
-    //   if (product) {
-    //     let qtn = parseInt(product?.quantity) - parseInt(order?.quantity);
-    //     const pay = parseFloat(product?.price) * parseInt(order?.quantity);
-    //     if (pay < 999999) {
-    //       order.pay = pay;
-    //       await toolsCollection.updateOne(
-    //         { _id: ObjectId(order?.product) },
-    //         { $set: { quantity: qtn } }
-    //       );
-
-    //       const result = await orders.insertOne(order);
-    //       return res.send(result);
-    //     } else {
-    //       return res.send({
-    //         message: " you can't order more than $999,999.99",
-    //       });
-    //     }
-    //   }
-    //   res.send({ message: "Product not found" });
-    // });
-
     // bookingCollection
     app.post("/booking", async (req, res) => {
       const booking = req.body;
       const result = bookingCollection.insertOne(booking);
       res.send(result);
+    });
+
+    // booking by particular id
+    app.get("/booking/:id", verifyJWTToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const booking = await bookingCollection.findOne(query);
+      res.send(booking);
     });
 
     // get booking orders
