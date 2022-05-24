@@ -125,15 +125,35 @@ async function run() {
     // user profile
     app.post("/userProfile", async (req, res) => {
       const userProfile = req.body;
-      const result = userProfileCollection.insertOne(userProfile);
+      const result = await userProfileCollection.insertOne(userProfile);
       res.send(result);
     });
 
     // manage all orders
-    app.get("/booking", async (req, res) => {
+    app.get("/bookingOrder", async (req, res) => {
       const query = {};
-      const cursor = bookingCollection.find(query);
-      const result = await cursor.toArray();
+      const cursor = await bookingCollection.find(query).toArray();
+      res.send(cursor);
+    });
+    app.delete("/bookingOrder/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bookingCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // delete from manageProducts
+    app.delete("/manage/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await toolsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // add new product
+    app.post("/addItem", async (req, res) => {
+      const newItem = req.body;
+      const result = await toolsCollection.insertOne(newItem);
       res.send(result);
     });
   } finally {
