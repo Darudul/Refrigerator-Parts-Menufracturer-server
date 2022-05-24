@@ -128,6 +128,14 @@ async function run() {
       const result = userProfileCollection.insertOne(userProfile);
       res.send(result);
     });
+
+    // manage all orders
+    app.get("/booking", async (req, res) => {
+      const query = {};
+      const cursor = bookingCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
