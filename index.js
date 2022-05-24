@@ -46,7 +46,7 @@ async function run() {
       .db("refrigerator_tools")
       .collection("userProfile");
 
-    app.get("/tool", async (req, res) => {
+    app.get("/tool", verifyJWTToken, async (req, res) => {
       const query = {};
       const cursor = toolsCollection.find(query);
       const tools = await cursor.toArray();
@@ -115,6 +115,14 @@ async function run() {
       res.send({ result, token });
     });
 
+    // admin nh tader access korte dibo nh
+    app.get("/admins/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await userCollection.findOne({ email: email });
+      const isAdmin = user.role === "admin";
+      res.send({ admin: isAdmin });
+    });
+
     // make user admin
     app.put("/user/admin/:email", verifyJWTToken, async (req, res) => {
       const email = req.params.email;
@@ -156,7 +164,7 @@ async function run() {
     });
 
     // manage all orders
-    app.get("/bookingOrder", async (req, res) => {
+    app.get("/bookingOrder", verifyJWTToken, async (req, res) => {
       const query = {};
       const cursor = await bookingCollection.find(query).toArray();
       res.send(cursor);
@@ -177,7 +185,7 @@ async function run() {
     });
 
     // add new product
-    app.post("/addItem", async (req, res) => {
+    app.post("/addItem", verifyJWTToken, async (req, res) => {
       const newItem = req.body;
       const result = await toolsCollection.insertOne(newItem);
       res.send(result);
