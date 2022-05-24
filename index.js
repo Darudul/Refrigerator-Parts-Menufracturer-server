@@ -42,6 +42,9 @@ async function run() {
       .db("refrigerator_tools")
       .collection("bookings");
     const userCollection = client.db("refrigerator_tools").collection("users");
+    const userProfileCollection = client
+      .db("refrigerator_tools")
+      .collection("userProfile");
 
     app.get("/tool", async (req, res) => {
       const query = {};
@@ -117,6 +120,13 @@ async function run() {
       const query = { email: email };
       const user = await userCollection.find(query).toArray();
       res.send(user);
+    });
+
+    // user profile
+    app.post("/userProfile", async (req, res) => {
+      const userProfile = req.body;
+      const result = userProfileCollection.insertOne(userProfile);
+      res.send(result);
     });
   } finally {
   }
