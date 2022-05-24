@@ -61,24 +61,31 @@ async function run() {
     });
 
     // update quantity
-    app.put("/tool/:id", async (req, res) => {
-      const id = req.params.id;
-      const updateQuantity = req.body;
-      console.log(updateQuantity);
-      const filter = { _id: ObjectId(id) };
-      const options = { upsert: true };
-      const updatedDoc = {
-        $set: {
-          quantity: updateQuantity.newQuantity,
-        },
-      };
-      const results = await toolsCollection.updateOne(
-        filter,
-        updatedDoc,
-        options
-      );
-      res.send(results);
-    });
+    // app.post("/api/order", async (req, res) => {
+    //   const order = req.body;
+    //   const product = await toolsCollection.findOne({
+    //     _id: ObjectId(order?.product),
+    //   });
+    //   if (product) {
+    //     let qtn = parseInt(product?.quantity) - parseInt(order?.quantity);
+    //     const pay = parseFloat(product?.price) * parseInt(order?.quantity);
+    //     if (pay < 999999) {
+    //       order.pay = pay;
+    //       await toolsCollection.updateOne(
+    //         { _id: ObjectId(order?.product) },
+    //         { $set: { quantity: qtn } }
+    //       );
+
+    //       const result = await orders.insertOne(order);
+    //       return res.send(result);
+    //     } else {
+    //       return res.send({
+    //         message: " you can't order more than $999,999.99",
+    //       });
+    //     }
+    //   }
+    //   res.send({ message: "Product not found" });
+    // });
 
     // bookingCollection
     app.post("/booking", async (req, res) => {
@@ -94,6 +101,14 @@ async function run() {
       // console.log(authorization);
       const query = { email: email };
       const bookings = await bookingCollection.find(query).toArray();
+      res.send(bookings);
+    });
+
+    // delete booking orders
+    app.delete("/booking", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const bookings = await bookingCollection.deleteOne(query);
       res.send(bookings);
     });
 
@@ -154,6 +169,14 @@ async function run() {
       const query = {};
       const user = await userCollection.find(query).toArray();
       res.send(user);
+    });
+
+    // delete data from all user
+    app.delete("/alluserr/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
     });
 
     // user profile
