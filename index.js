@@ -1,11 +1,11 @@
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(`${process.env.STRIPE_SECRET_KEY}`);
 
-const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
@@ -46,6 +46,9 @@ async function run() {
     const userProfileCollection = client
       .db("refrigerator_tools")
       .collection("userProfile");
+    const paymentCollection = client
+      .db("refrigerator_tools")
+      .collection("payments");
 
     app.get("/tools", async (req, res) => {
       const query = {};
@@ -61,19 +64,6 @@ async function run() {
       res.send(tool);
     });
 
-    // payment post api
-    // app.post("/create", async (req, res) => {
-    //   const service = req.body;
-    //   const price = service.price;
-    //   const amount = price * 100;
-    //   const paymentIntent = await stripe.paymentIntents.create({
-    //     amount: amount,
-    //     currency: "usd",
-    //     payment_method_types: ["card"],
-    //   });
-    //   res.send({ clientSecret: paymentIntent.client_secret });
-    // });
-
     // bookingCollection
     app.post("/booking", async (req, res) => {
       const booking = req.body;
@@ -81,11 +71,14 @@ async function run() {
       res.send(result);
     });
 
-    // booking by particular id
-    app.get("/booking/:id", verifyJWTToken, async (req, res) => {
+    //pay route booking by particular id
+    app.get("/mybooking/:id", async (req, res) => {
+      console.log(req.params);
       const id = req.params.id;
+
       const query = { _id: ObjectId(id) };
       const booking = await bookingCollection.findOne(query);
+      console.log(booking);
       res.send(booking);
     });
 
@@ -207,6 +200,46 @@ async function run() {
       const newItem = req.body;
       const result = await toolsCollection.insertOne(newItem);
       res.send(result);
+    });
+    // payment post api
+    app.post("/create-payment-intent", verifyJWTToken, async (req, res) => {
+      const service = req.body;
+      // console.log(service);
+      const price = service.price;
+      // console.log(price);
+      const amount = price * 100;
+      console.log(amount);
+      if (amount) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: "usd",
+          payment_method_types: ["card"],
+        });
+
+        return res.send({ clientSecret: paymentIntent.client_secret });
+      } else {
+        return res.send({ clientSecret: "" });
+      }
+    });
+
+    // update booking
+    app.patch("/cardBooking/:id", verifyJWTToken, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+
+      const result = await paymentCollection.insertOne(payment);
+      const updatedBooking = await bookingCollection.updateOne(
+        filter,
+        updatedDoc
+      );
+      res.send(updatedBooking);
     });
   } finally {
   }
