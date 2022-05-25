@@ -3,6 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,7 +21,7 @@ const client = new MongoClient(uri, {
 
 function verifyJWTToken(req, res, next) {
   const authHeader = req.headers.authorization;
-  console.log(authHeader);
+  // console.log(authHeader);
   if (!authHeader) {
     return res.status(401).send({ message: "UnAuthorized access" });
   }
@@ -58,6 +59,19 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const tool = await toolsCollection.findOne(query);
       res.send(tool);
+    });
+
+    // payment post api
+    app.post("/create-payment-intent", verifyJWTToken, async (req, res) => {
+      const service = req.body;
+      const price = service.price;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({ clientSecret: paymentIntent.client_secret });
     });
 
     // bookingCollection
