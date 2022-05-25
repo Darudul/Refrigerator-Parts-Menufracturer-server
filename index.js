@@ -3,7 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -47,7 +47,7 @@ async function run() {
       .db("refrigerator_tools")
       .collection("userProfile");
 
-    app.get("/tool", verifyJWTToken, async (req, res) => {
+    app.get("/tools", async (req, res) => {
       const query = {};
       const cursor = toolsCollection.find(query);
       const tools = await cursor.toArray();
@@ -62,17 +62,17 @@ async function run() {
     });
 
     // payment post api
-    app.post("/create-payment-intent", verifyJWTToken, async (req, res) => {
-      const service = req.body;
-      const price = service.price;
-      const amount = price * 100;
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: "usd",
-        payment_method_types: ["card"],
-      });
-      res.send({ clientSecret: paymentIntent.client_secret });
-    });
+    // app.post("/create", async (req, res) => {
+    //   const service = req.body;
+    //   const price = service.price;
+    //   const amount = price * 100;
+    //   const paymentIntent = await stripe.paymentIntents.create({
+    //     amount: amount,
+    //     currency: "usd",
+    //     payment_method_types: ["card"],
+    //   });
+    //   res.send({ clientSecret: paymentIntent.client_secret });
+    // });
 
     // bookingCollection
     app.post("/booking", async (req, res) => {
@@ -120,13 +120,13 @@ async function run() {
       const token = jwt.sign(
         { email: email },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1d" }
+        { expiresIn: "1h" }
       );
       res.send({ result, token });
     });
 
     // admin nh tader access korte dibo nh
-    app.get("/admins/:email", async (req, res) => {
+    app.get("/admins/:email", verifyJWTToken, async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === "admin";
