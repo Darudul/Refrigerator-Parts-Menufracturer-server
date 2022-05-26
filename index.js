@@ -49,6 +49,9 @@ async function run() {
     const paymentCollection = client
       .db("refrigerator_tools")
       .collection("payments");
+    const reviewsCollection = client
+      .db("refrigerator_tools")
+      .collection("reviews");
 
     app.get("/tools", async (req, res) => {
       const query = {};
@@ -57,6 +60,19 @@ async function run() {
       res.send(tools);
     });
 
+    // update profile information
+    app.put("/api/users/profile", verifyJWTToken, async (req, res) => {
+      const data = req.body;
+      const filter = { email: data.email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: data,
+      };
+      const result = await profile.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    // shipment
     app.patch("/api/orders/shipped/:id", async (req, res) => {
       const id = req.params.id;
       const status = req.body;
@@ -196,6 +212,13 @@ async function run() {
       const cursor = await bookingCollection.find(query).toArray();
       res.send(cursor);
     });
+    // getuser profile information
+    app.get("/userProfile", async (req, res) => {
+      const query = {};
+      const cursor = await userProfileCollection.find(query).toArray();
+      res.send(cursor);
+    });
+
     app.delete("/bookingOrder/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -216,6 +239,20 @@ async function run() {
       const newItem = req.body;
       const result = await toolsCollection.insertOne(newItem);
       res.send(result);
+    });
+
+    // post reviews data
+    app.post("/reviews", verifyJWTToken, async (req, res) => {
+      const newItem = req.body;
+      const result = await reviewsCollection.insertOne(newItem);
+      res.send(result);
+    });
+
+    // get reviews data from bakend
+    app.get("/reviewsget", async (req, res) => {
+      const query = {};
+      const cursor = await reviewsCollection.find(query).toArray();
+      res.send(cursor);
     });
     // payment post api
     app.post("/create-payment-intent", verifyJWTToken, async (req, res) => {
