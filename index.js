@@ -315,9 +315,9 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello From refriggttgvggghghtor menutacter!");
+  res.send("Welcome to our menufracturer company!");
 });
 
 app.listen(port, () => {
-  console.log(`Hello Fhhttyuyyhggvb myuhhacter port is running ${port}`);
+  console.log(`Welcome to our refrigerator parts menufracturer. ${port}`);
 });

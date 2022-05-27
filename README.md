@@ -1,20 +1,18 @@
-# fruits
+# Refrigerator parts server
 
-### This website is about Refrigerator Parts Menufracturer. User can book an order, cancel order, add Own profile Information and Add Reviews.
+### This website is about Refrigerator Parts Menufracturer. 
+## Live Server link:
 
-## Live website link:
-
-click here: https://fruits-warehouse-website.web.app/
+click here: https://limitless-dusk-82358.herokuapp.com/
 
 # Project-Overview
 
 ---
 
-- This website is about fruits warehouse. From this warehouse customer can order which fruits they want and how much they want. On home page user can see 6 inventory item. Our service and our supliers information.
-- On Inventory Item there is a update button by clicking this button can see delivered item and also got one input field this field called restock from there can update quantity.
-- Every page footer is common.
-- On blogs page describe four question. These are: 1.Difference between javascript and nodejs ? 2.When should you use nodejs and when should you use mongodb? 3. Differences between sql and nosql databases. 4.What is the purpose of jwt and how does it work?
-- On my item page user can see his/her items which they added and manage the items also.
-- On Manage item page can see all item.
-- On about page we describe about our warehouse.
-- On login page user can login and also toggle sign in page.
+- This website is about refrigerator parts manufacturer. For this website we install mongodb, cors, express, dotenv, jsonwebtoken.
+- Then open a project on mongodb website, setup IP address, open database and create collection.
+- For server running open PORT localhost 5000.
+- For get all data from mongodb use get method
+- For delete data use delete method.
+- For insert data on mongodb use post method.
+- For update data use put method.
