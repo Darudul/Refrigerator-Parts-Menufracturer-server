@@ -53,6 +53,18 @@ async function run() {
       .db("refrigerator_tools")
       .collection("reviews");
 
+    const verifyAdmin = async (req, res, next) => {
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAccount.role === "admin") {
+        next();
+      } else {
+        res.status(403).send({ message: "forbidden" });
+      }
+    };
+
     app.get("/tools", async (req, res) => {
       const query = {};
       const cursor = toolsCollection.find(query);
@@ -61,15 +73,19 @@ async function run() {
     });
 
     // update profile information
-    app.put("/api/users/profile", verifyJWTToken, async (req, res) => {
+    app.put("/api/users/profile", async (req, res) => {
       const data = req.body;
       const filter = { email: data.email };
       const options = { upsert: true };
       const updateDoc = {
         $set: data,
       };
-      const result = await profile.updateOne(filter, updateDoc, options);
-      res.send(result);
+      const result = await userProfileCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send({ result });
     });
 
     // shipment
@@ -159,23 +175,20 @@ async function run() {
     });
 
     // make user admin
-    app.put("/user/admin/:email", verifyJWTToken, async (req, res) => {
-      const email = req.params.email;
-      const requester = req.decoded.email;
-      const requesterAccount = await userCollection.findOne({
-        email: requester,
-      });
-      if (requesterAccount.role === "admin") {
+    app.put(
+      "/user/admin/:email",
+      verifyJWTToken,
+      verifyAdmin,
+      async (req, res) => {
+        const email = req.params.email;
         const filter = { email: email };
         const updateDoc = {
           $set: { role: "admin" },
         };
         const result = await userCollection.updateOne(filter, updateDoc);
         res.send(result);
-      } else {
-        res.status(403).send({ message: "forbidden access" });
       }
-    });
+    );
     // get user data by email
     app.get("/user", async (req, res) => {
       const email = req.query.email;
@@ -200,11 +213,11 @@ async function run() {
     });
 
     // user profile
-    app.post("/userProfile", async (req, res) => {
-      const userProfile = req.body;
-      const result = await userProfileCollection.insertOne(userProfile);
-      res.send(result);
-    });
+    // app.post("/userProfile", async (req, res) => {
+    //   const userProfile = req.body;
+    //   const result = await userProfileCollection.insertOne(userProfile);
+    //   res.send(result);
+    // });
 
     // manage all orders
     app.get("/bookingOrder", verifyJWTToken, async (req, res) => {
@@ -214,9 +227,10 @@ async function run() {
     });
     // getuser profile information
     app.get("/userProfile", async (req, res) => {
-      const query = {};
-      const cursor = await userProfileCollection.find(query).toArray();
-      res.send(cursor);
+      const email = req.query.email;
+      const query = { email: email };
+      const user = await userProfileCollection.find(query).toArray();
+      res.send(user);
     });
 
     app.delete("/bookingOrder/:id", async (req, res) => {
@@ -235,7 +249,7 @@ async function run() {
     });
 
     // add new product
-    app.post("/addItem", verifyJWTToken, async (req, res) => {
+    app.post("/addItem", verifyJWTToken, verifyAdmin, async (req, res) => {
       const newItem = req.body;
       const result = await toolsCollection.insertOne(newItem);
       res.send(result);
