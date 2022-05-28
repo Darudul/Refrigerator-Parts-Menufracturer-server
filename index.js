@@ -65,7 +65,7 @@ async function run() {
       }
     };
 
-    app.get("/tools", async (req, res) => {
+    app.get("/tools", verifyJWTToken, async (req, res) => {
       const query = {};
       const cursor = toolsCollection.find(query);
       const tools = await cursor.toArray();
@@ -73,7 +73,7 @@ async function run() {
     });
 
     // update profile information
-    app.put("/api/users/profile", async (req, res) => {
+    app.put("/api/users/profile", verifyJWTToken, async (req, res) => {
       const data = req.body;
       const filter = { email: data.email };
       const options = { upsert: true };
@@ -89,21 +89,26 @@ async function run() {
     });
 
     // shipment
-    app.patch("/api/orders/shipped/:id", async (req, res) => {
-      const id = req.params.id;
-      const status = req.body;
-      const filter = { _id: ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          status: status.status,
-        },
-      };
-      const updatedBooking = await bookingCollection.updateOne(
-        filter,
-        updatedDoc
-      );
-      res.send(updatedBooking);
-    });
+    app.patch(
+      "/api/orders/shipped/:id",
+      verifyJWTToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const status = req.body;
+        const filter = { _id: ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            status: status.status,
+          },
+        };
+        const updatedBooking = await bookingCollection.updateOne(
+          filter,
+          updatedDoc
+        );
+        res.send(updatedBooking);
+      }
+    );
 
     app.get("/tool/:id", async (req, res) => {
       const id = req.params.id;
@@ -198,7 +203,7 @@ async function run() {
     });
 
     // get all user
-    app.get("/allusers", verifyJWTToken, async (req, res) => {
+    app.get("/allusers", verifyJWTToken, verifyAdmin, async (req, res) => {
       const query = {};
       const user = await userCollection.find(query).toArray();
       res.send(user);

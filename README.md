@@ -1,9 +1,10 @@
-# Refrigerator parts server
+# Refrigerator Parts Menufracturer website
 
-### This website is about Refrigerator Parts Menufracturer. 
+### This website is about Refrigerator Parts Menufracturer.
+
 ## Live Server link:
 
-click here: https://limitless-dusk-82358.herokuapp.com/
+click here: https://assignment-12-156a9.web.app/
 
 # Project-Overview
 
