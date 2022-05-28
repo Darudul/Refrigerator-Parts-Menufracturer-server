@@ -65,7 +65,7 @@ async function run() {
       }
     };
 
-    app.get("/tools", verifyJWTToken, async (req, res) => {
+    app.get("/tools", async (req, res) => {
       const query = {};
       const cursor = toolsCollection.find(query);
       const tools = await cursor.toArray();
